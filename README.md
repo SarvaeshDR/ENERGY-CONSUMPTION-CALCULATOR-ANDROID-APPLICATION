@@ -59,9 +59,192 @@ Cost = Energy Consumption × Tariff per Unit
 10.	Display the energy consumption in kWh.
 11.	Display the estimated electricity cost.
 12.	Stop.
+# PROGRAM
+XML
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="@string/title_calculator"
+            android:textAlignment="center"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:hint="@string/hint_power">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/power"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:hint="@string/hint_hours">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/hours"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:hint="@string/hint_days">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/days"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:hint="@string/hint_rate">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/rate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/calculate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:text="@string/btn_calculate" />
+
+        <TextView
+            android:id="@+id/result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="Daily Consumption: 0.00 kWh\n\nMonthly Consumption: 0.00 units\n\nEstimated Electricity Cost: ₹0.00" />
+
+    </LinearLayout>
+</ScrollView>
+# KT
+package com.example.developingenergyconsumptioncalculatorapplication
+
+import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import java.util.Locale
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var power: EditText
+    private lateinit var hours: EditText
+    private lateinit var days: EditText
+    private lateinit var rate: EditText
+    private lateinit var result: TextView
+    private lateinit var calculate: Button
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        power = findViewById(R.id.power)
+        hours = findViewById(R.id.hours)
+        days = findViewById(R.id.days)
+        rate = findViewById(R.id.rate)
+        result = findViewById(R.id.result)
+        calculate = findViewById(R.id.calculate)
+
+        calculate.setOnClickListener {
+            try {
+                val powerStr = power.text.toString().trim()
+                val hoursStr = hours.text.toString().trim()
+                val daysStr = days.text.toString().trim()
+                val rateStr = rate.text.toString().trim()
+
+                if (powerStr.isEmpty() || hoursStr.isEmpty() || daysStr.isEmpty() || rateStr.isEmpty()) {
+                    Toast.makeText(
+                        this,
+                        "Please fill in all fields correctly",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setOnClickListener
+                }
+
+                val p = powerStr.toDouble()
+                val h = hoursStr.toDouble()
+                val d = daysStr.toInt()
+                val r = rateStr.toDouble()
+
+                if (p <= 0 || h < 0 || h > 24 || d < 1 || d > 31 || r < 0) {
+                    Toast.makeText(
+                        this,
+                        "Enter valid values",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setOnClickListener
+                }
+
+                val daily = (p * h) / 1000.0
+                val monthly = daily * d
+                val cost = monthly * r
+
+                val output = String.format(
+                    Locale.getDefault(),
+                    "Daily Consumption: %.2f kWh\n\n" +
+                            "Monthly Consumption: %.2f units\n\n" +
+                            "Estimated Electricity Cost: ₹%.2f",
+                    daily, monthly, cost
+                )
+
+                result.text = output
+            } catch (_: NumberFormatException) {
+                Toast.makeText(
+                    this,
+                    "Please fill in all fields correctly",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+}
+
 
 # EXPECTED OUTPUT
 ENERGY CONSUMPTION CALCULATOR
+<img width="1862" height="997" alt="Screenshot 2026-11-26 140244" src="https://github.com/user-attachments/assets/313e3e84-9154-45e4-a76a-a1725ede1187" />
+
+
 
 # APPLICATION FEATURES
 
